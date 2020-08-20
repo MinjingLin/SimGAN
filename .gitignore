@@ -88,6 +88,15 @@ ENV/
 # Rope project settings
 .ropeproject
 
-dataset/
+# lmj ignore files
+bk/
+
+dataset/*
+!.gitkeep
+
 .vscode/
-cache/
+
+cache/*
+!.gitkeep
+
+
