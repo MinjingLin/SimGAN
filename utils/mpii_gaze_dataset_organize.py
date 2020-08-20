@@ -13,7 +13,7 @@ from PIL import Image
 import scipy.io as sio
 
 
-save_dir = '/Users/mjdietzx/Downloads/MPIIGaze_Dataset'
+save_dir = './dataset/mpiigaze'
 
 
 def butchered_mp_normalized_matlab_helper(mat_file_path):
@@ -40,6 +40,6 @@ def butchered_mp_normalized_matlab_helper(mat_file_path):
 if __name__ == '__main__':
     os.makedirs(save_dir)
 
-    for filename in glob.iglob('/Users/mjdietzx/Downloads/MPIIGaze/Data/Normalized/**/*.mat', recursive=True):
+    for filename in glob.iglob('./dataset/normalized/**/*.mat', recursive=True):
         print(filename)
         butchered_mp_normalized_matlab_helper(filename)
