@@ -166,11 +166,11 @@ def get_image_batch(generator):
 
 disc_output_shape = disc.output_shape
 
-y_real = np.array([[[1.0, 0.0]] * disc_output_shape[1]] * batch_size)
-y_refined = np.array([[[0.0, 1.0]] * disc_output_shape[1]] * batch_size)
+y_real_label = np.array([[[1.0, 0.0]] * disc_output_shape[1]] * batch_size)
+y_refined_label = np.array([[[0.0, 1.0]] * disc_output_shape[1]] * batch_size)
 
-assert y_real.shape == (batch_size, disc_output_shape[1], 2)
-assert y_refined.shape == (batch_size, disc_output_shape[1], 2)
+assert y_real_label.shape == (batch_size, disc_output_shape[1], 2)
+assert y_refined_label.shape == (batch_size, disc_output_shape[1], 2)
 
 batch_out = get_image_batch(syn_gen)
 assert batch_out.shape == (batch_size, img_height, img_width, channels), "Image dimension do not match, {} != {}" \
@@ -205,12 +205,10 @@ def pretrain_gen(steps, log_interval, save_path, profiling=True):
 
     if profiling:
         duration = time.perf_counter() - start
-        print('pre-training the refiner model for {} steps lasted = {:.2f} minutes = {:.2f} hours'.format(steps, duration/60., duration/3600.))
-    
-#     refiner.save(save_path)
-    
-    return losses
+        print('pre-training the refiner model for {} steps lasted = {:.2f} minutes = {:.2f} hours'.format(steps, duration / 60., duration / 3600.))
 
+    #refiner.save(save_path)
+    return losses
 
 # we first train the Rθ network with just self-regularization loss for 1,000 steps
 gen_pre_steps = 1000
@@ -233,10 +231,10 @@ def pretrain_disc(steps, log_interval, save_path, profiling=True):
         start = time.perf_counter()
     for i in range(steps):
         real_imgs_batch = get_image_batch(real_gen)
-        disc_real_loss = disc.train_on_batch(real_imgs_batch, y_real)
+        disc_real_loss = disc.train_on_batch(real_imgs_batch, y_real_label)
         
         syn_imgs_batch = get_image_batch(syn_gen)
-        disc_refined_loss = disc.train_on_batch(syn_imgs_batch, y_refined)
+        disc_refined_loss = disc.train_on_batch(syn_imgs_batch, y_refined_label)
         
         disc_loss += 0.5 * np.add(disc_real_loss, disc_refined_loss)
 
@@ -249,7 +247,7 @@ def pretrain_disc(steps, log_interval, save_path, profiling=True):
         duration = time.perf_counter() - start
         print('pre-training the discriminator model for {} steps lasted = {:.2f} minutes = {:.2f} hours'.format(steps, duration/60., duration/3600.))
     
-    disc.save(save_path)
+    #disc.save(save_path)
     return losses
 
 # and Dφ for 200 steps (one mini-batch for refined images, another for real)
@@ -285,7 +283,7 @@ for i in range(nb_steps):
         # sample a mini-batch of synthetic images
         syn_img_batch = get_image_batch(syn_gen)
         # update θ by taking an SGD step on mini-batch loss LR(θ)
-        loss = combined_model.train_on_batch(syn_img_batch, [syn_img_batch, y_real])
+        loss = combined_model.train_on_batch(syn_img_batch, [syn_img_batch, y_real_label])
         gan_loss = np.add(gan_loss, loss)
     
     for _ in range(k_d):
@@ -304,9 +302,9 @@ for i in range(nb_steps):
             refined_img_batch[:batch_size//2] = history_img_half_batch
         
         # update φ by taking an SGD step on mini-batch loss LD(φ)
-        real_loss = disc.train_on_batch(real_img_batch, y_real)
+        real_loss = disc.train_on_batch(real_img_batch, y_real_label)
         disc_loss_real += real_loss
-        ref_loss = disc.train_on_batch(refined_img_batch, y_refined)
+        ref_loss = disc.train_on_batch(refined_img_batch, y_refined_label)
         disc_loss_refined += ref_loss
         disc_loss += 0.5 * (real_loss + ref_loss)
     
@@ -329,8 +327,8 @@ for i in range(nb_steps):
             os.path.join(cache_dir, figure_name),
             label_batch=['Synthetic']*plotted_imgs + ['Refined']*plotted_imgs)
 
-refiner.save(os.path.join(cache_dir, 'refiner_model_{}.h5'.format(disc_pre_steps)))
-disc.save(os.path.join(cache_dir, 'disc_model_{}.h5'.format(disc_pre_steps)))
-combined_model.save(os.path.join(cache_dir, 'simgan_model_{}.h5'.format(disc_pre_steps)))
+refiner.save(os.path.join(cache_dir, 'refiner_model_{}.h5'.format(nb_steps)))
+disc.save(os.path.join(cache_dir, 'disc_model_{}.h5'.format(nb_steps)))
+combined_model.save(os.path.join(cache_dir, 'simgan_model_{}.h5'.format(nb_steps)))
 
 

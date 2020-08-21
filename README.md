@@ -1,8 +1,7 @@
 # SimGAN
 Keras implementation of Apple's [Learning from Simulated and Unsupervised Images through Adversarial Training](https://arxiv.org/pdf/1612.07828v1.pdf)
 
-code refer to [SimGAN](https://www.kaggle.com/soundpoet/simgan-implementation-using-tensorflow-keras), [MPIIGazeOverview]
-(https://www.kaggle.com/kmader/eye-overview)
+code refer to [SimGAN](https://www.kaggle.com/soundpoet/simgan-implementation-using-tensorflow-keras), [MPIIGazeOverview](https://www.kaggle.com/kmader/eye-overview)
 
 ## Running
 

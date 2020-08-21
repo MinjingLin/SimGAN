@@ -3,3 +3,7 @@ git+https://github.com/fchollet/keras.git
 matplotlib
 numpy
 tensorflow
+keras
+scikit-image
+pydot_ng
+graphviz
